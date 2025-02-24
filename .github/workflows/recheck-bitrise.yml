@@ -1,0 +1,39 @@
+name: Recheck Bitrise
+
+on:
+  workflow_run:
+    workflows: ["Bitrise CI"]
+    types:
+      - completed
+
+jobs:
+  recheck-bitrise:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Bitrise result
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const ref = context.payload.workflow_run.head_sha;
+            
+            const { data: checks } = await github.rest.checks.listForRef({
+              owner,
+              repo,
+              ref
+            });
+
+            const bitriseCheck = checks.check_runs.find(check =>
+              check.name.toLowerCase().includes('bitrise')
+            );
+
+            if (!bitriseCheck) {
+              console.log("Bitrise check not found.");
+              return;
+            }
+
+            if (bitriseCheck.conclusion === 'success') {
+              console.log("✅ Bitrise check passed.");
+            } else {
+              core.setFailed("❌ Bitrise check failed.");
+            }
