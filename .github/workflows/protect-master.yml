@@ -44,7 +44,7 @@ jobs:
               check.name.toLowerCase().includes('ci/bitrise')
             );
 
-            console.log("Bitrise check: " + bitriseCheck.conclusion);
+            console.log("Bitrise check: " + console.log(JSON.stringify(bitriseCheck, null, 2)));
             if (!bitriseCheck) {
               console.log("Bitrise check not found. Branch is rn/ so failing");
               core.setFailed("Bitrise check not present.");
