@@ -41,7 +41,7 @@ jobs:
             });
 
             const bitriseCheck = checks.check_runs.find(check =>
-              check.name.toLowerCase().includes('bitrise')
+              check.name.toLowerCase().includes('ci/bitrise')
             );
 
             console.log("Bitrise check: " + bitriseCheck.conclusion);
