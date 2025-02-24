@@ -1,1 +1,1 @@
-sadlajda;
+now do a bitrise build sadlajda;
