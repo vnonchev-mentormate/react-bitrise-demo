@@ -44,10 +44,10 @@ jobs:
               check.name.toLowerCase().includes('bitrise')
             );
 
-            console.log("Bitrise check: " + bitriseCheck);
+            console.log("Bitrise check: " + bitriseCheck.conclusion);
             if (!bitriseCheck) {
-              console.log("Bitrise check not found yet. Will retry when Bitrise completes.");
-              return; // Exit successfully, Bitrise will trigger the next workflow
+              console.log("Bitrise check not found. Branch is rn/ so failing");
+              core.setFailed("Bitrise check not present.");
             }
 
             if (bitriseCheck.conclusion === 'success') {
