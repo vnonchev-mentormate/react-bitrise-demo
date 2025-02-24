@@ -1,6 +1,9 @@
 name: Protect Master
 
 on:
+  check_run:
+    types:
+      - completed
   pull_request:
     branches:
       - master
