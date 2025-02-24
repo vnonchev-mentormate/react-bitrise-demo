@@ -26,32 +26,24 @@ jobs:
         if: env.IS_RN_BRANCH == 'false'
         run: echo "Skipping Bitrise check since branch does not start with rn/."
 
-      - name: Check Bitrise status (without waiting)
+      - name: Wait for Bitrise check
         if: env.IS_RN_BRANCH == 'true'
         uses: actions/github-script@v7
         with:
           script: |
-            const { owner, repo } = context.repo;
-            const ref = context.payload.pull_request.head.sha;
-            
+            const { owner, repo, number } = context.issue;
             const { data: checks } = await github.rest.checks.listForRef({
               owner,
               repo,
-              ref
+              ref: context.payload.pull_request.head.sha,
             });
 
-            const bitriseCheck = checks.check_runs.find(check =>
-              check.name.toLowerCase().includes('ci/bitrise')
-            );
+            const bitriseCheck = checks.check_runs.find(check => check.name.toLowerCase().includes('bitrise'));
 
-            console.log("Bitrise check: " + console.log(JSON.stringify(bitriseCheck, null, 2)));
             if (!bitriseCheck) {
-              console.log("Bitrise check not found. Branch is rn/ so failing");
-              core.setFailed("Bitrise check not present.");
-            }
-
-            if (bitriseCheck.conclusion === 'success') {
-              console.log("✅ Bitrise check passed.");
+              core.setFailed("Bitrise check not found.");
+            } else if (bitriseCheck.conclusion !== 'success') {
+              core.setFailed("Bitrise check did not complete successfully.");
             } else {
-              core.setFailed("❌ Bitrise check failed.");
-            } 
+              console.log("Bitrise check passed.");
+            }

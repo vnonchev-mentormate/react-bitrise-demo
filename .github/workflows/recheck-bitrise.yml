@@ -1,8 +1,7 @@
 name: Recheck Bitrise
 
 on:
-  workflow_run:
-    workflows: ["Bitrise CI"]
+  check_run:
     types:
       - completed
 
