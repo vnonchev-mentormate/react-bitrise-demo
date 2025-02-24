@@ -1,0 +1,49 @@
+name: Protect Master
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  check-bitrise:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract source branch name
+        id: branch
+        run: echo "SOURCE_BRANCH=${{ github.head_ref }}" >> $GITHUB_ENV
+
+      - name: Check if branch starts with rn/
+        id: check_prefix
+        run: |
+          if [[ "${{ env.SOURCE_BRANCH }}" == rn/* ]]; then
+            echo "IS_RN_BRANCH=true" >> $GITHUB_ENV
+          else
+            echo "IS_RN_BRANCH=false" >> $GITHUB_ENV
+          fi
+
+      - name: Succeed immediately if branch does not start with rn/
+        if: env.IS_RN_BRANCH == 'false'
+        run: echo "Skipping Bitrise check since branch does not start with rn/."
+
+      - name: Wait for Bitrise check
+        if: env.IS_RN_BRANCH == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo, number } = context.issue;
+            const { data: checks } = await github.rest.checks.listForRef({
+              owner,
+              repo,
+              ref: context.payload.pull_request.head.sha,
+            });
+
+            const bitriseCheck = checks.check_runs.find(check => check.name.toLowerCase().includes('bitrise'));
+
+            if (!bitriseCheck) {
+              core.setFailed("Bitrise check not found.");
+            } else if (bitriseCheck.conclusion !== 'success') {
+              core.setFailed("Bitrise check did not complete successfully.");
+            } else {
+              console.log("Bitrise check passed.");
+            }
