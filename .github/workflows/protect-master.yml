@@ -44,6 +44,7 @@ jobs:
               check.name.toLowerCase().includes('bitrise')
             );
 
+            console.log("Bitrise check: " + bitriseCheck);
             if (!bitriseCheck) {
               console.log("Bitrise check not found yet. Will retry when Bitrise completes.");
               return; // Exit successfully, Bitrise will trigger the next workflow
@@ -53,4 +54,4 @@ jobs:
               console.log("✅ Bitrise check passed.");
             } else {
               core.setFailed("❌ Bitrise check failed.");
-            }
+            } 
